@@ -1,20 +1,26 @@
 import { StyleSheet, Text, View } from "react-native";
+import { appTheme } from "../theme";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 
 type Props = {
   data: { x: string; y: number }[];
 };
 
 export function EmotionChart({ data }: Props) {
+  const themeMode = useSelector((s: RootState) => s.theme.mode);
+  const { colors } = appTheme(themeMode);
   const max = Math.max(...data.map((d) => d.y), 1);
+  
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: colors.card }]}>
       {data.map((item) => (
         <View key={item.x} style={styles.row}>
-          <Text style={styles.label}>{item.x}</Text>
-          <View style={styles.track}>
-            <View style={[styles.bar, { width: `${(item.y / max) * 100}%` }]} />
+          <Text style={[styles.label, { color: colors.textMuted }]}>{item.x}</Text>
+          <View style={[styles.track, { backgroundColor: colors.surface }]}>
+            <View style={[styles.bar, { width: `${(item.y / max) * 100}%`, backgroundColor: colors.fountainBlue }]} />
           </View>
-          <Text style={styles.value}>{item.y}</Text>
+          <Text style={[styles.value, { color: colors.text }]}>{item.y}</Text>
         </View>
       ))}
     </View>
@@ -22,10 +28,16 @@ export function EmotionChart({ data }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { marginTop: 8, backgroundColor: "#fff", borderRadius: 12, padding: 10, gap: 8 },
-  row: { flexDirection: "row", alignItems: "center", gap: 8 },
-  label: { width: 20, color: "#6B786C" },
-  track: { flex: 1, height: 10, borderRadius: 10, backgroundColor: "#E9EFE7", overflow: "hidden" },
-  bar: { height: 10, borderRadius: 10, backgroundColor: "#A8D5BA" },
-  value: { width: 20, textAlign: "right", color: "#3C4D3F" },
+  wrap: { 
+    marginTop: 8, 
+    width: '100%',
+    borderRadius: 20, 
+    padding: 16, 
+    gap: 12 
+  },
+  row: { flexDirection: "row", alignItems: "center", gap: 12 },
+  label: { width: 28, fontSize: 12, fontWeight: "700" },
+  track: { flex: 1, height: 14, borderRadius: 14, overflow: "hidden" },
+  bar: { height: 14, borderRadius: 14 },
+  value: { width: 24, textAlign: "right", fontSize: 12, fontWeight: "800" },
 });

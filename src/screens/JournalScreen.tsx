@@ -6,13 +6,17 @@ import { addEntry } from "../store/slices/journalSlice";
 import { MoodSelector } from "../components/MoodSelector";
 import { MoodType } from "../store/slices/moodSlice";
 import { EmotionChart } from "../components/EmotionChart";
-import { colors } from "../theme";
+import { appTheme } from "../theme";
 
 const moodWeight: Record<MoodType, number> = { happy: 5, calm: 4, tired: 3, anxious: 2, sad: 1 };
 
 export function JournalScreen() {
   const dispatch = useDispatch();
   const entries = useSelector((s: RootState) => s.journal.entries);
+  const themeMode = useSelector((s: RootState) => s.theme.mode);
+  const theme = appTheme(themeMode);
+  const { colors } = theme;
+  const dynamicStyles = styles(colors);
   const [mood, setMood] = useState<MoodType>("calm");
   const [text, setText] = useState("");
 
@@ -42,81 +46,100 @@ export function JournalScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.topHeader}>
-        <Text style={styles.brand}>MindGarden</Text>
-        <Text style={styles.headerPill}>Mood Journal</Text>
-      </View>
-
-      <View style={styles.heroSection}>
-        <Text style={styles.title}>记录此刻</Text>
-        <Text style={styles.subtitle}>用温柔的文字，把情绪从心里慢慢放下</Text>
-      </View>
-
-      <View style={styles.block}>
-        <Text style={styles.blockTitle}>How are you feeling?</Text>
-        <MoodSelector value={mood} onChange={setMood} />
-      </View>
-
-      <View style={styles.inputCard}>
-        <TextInput
-          multiline
-          value={text}
-          onChangeText={setText}
-          placeholder="写下今天发生的事..."
-          placeholderTextColor="#6F7B70"
-          style={styles.input}
-        />
-        <View style={styles.row}>
-          <Pressable style={styles.ghostBtn}>
-            <Text style={styles.ghostBtnText}>📸 上传图片</Text>
-          </Pressable>
-          <Pressable style={styles.ghostBtn}>
-            <Text style={styles.ghostBtnText}>🎙 语音记录</Text>
-          </Pressable>
-        </View>
-        <Pressable style={styles.saveBtn} onPress={save}>
-          <Text style={styles.saveText}>保存记录</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.chartBlock}>
-        <Text style={styles.sectionTitle}>月度情绪分布</Text>
-        <View style={styles.chartWrapper}>
-          <EmotionChart data={chartData.length ? chartData : [{ x: "1", y: 3 }]} />
-        </View>
-      </View>
-
-      <Text style={styles.sectionTitle}>时光长廊</Text>
-      {entries.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>还没有记录，开始写下第一篇吧...</Text>
-        </View>
-      ) : (
-        entries.map((e) => (
-          <View key={e.id} style={styles.entryCard}>
-            <View style={styles.entryHeader}>
-              <Text style={styles.entryDate}>{e.date}</Text>
-              <View style={styles.moodTag}>
-                <Text style={styles.moodTagText}>{e.mood.toUpperCase()}</Text>
-              </View>
-            </View>
-            <Text style={styles.entryText}>{e.text}</Text>
+    <View style={dynamicStyles.container}>
+      {/* 装饰性背景元素 */}
+      <View style={[dynamicStyles.bgCircle, { top: -80, right: -80, backgroundColor: colors.roseRed + "08" }]} />
+      <View style={[dynamicStyles.bgCircle, { bottom: 50, left: -100, backgroundColor: colors.fountainBlue + "10" }]} />
+      
+      <ScrollView contentContainerStyle={dynamicStyles.content}>
+        <View style={dynamicStyles.topHeader}>
+          <View style={dynamicStyles.brandContainer}>
+            <Text style={dynamicStyles.brandLeaf}>⛲</Text>
+            <Text style={dynamicStyles.brand}>MindGarden</Text>
           </View>
-        ))
-      )}
-    </ScrollView>
+          <Text style={dynamicStyles.headerPill}>玫瑰庄园</Text>
+        </View>
+
+        <View style={dynamicStyles.heroSection}>
+          <Text style={dynamicStyles.title}>笔尖花开</Text>
+          <Text style={dynamicStyles.subtitle}>在庄园的静谧时刻，让文字如玫瑰般绽放</Text>
+        </View>
+
+        <View style={[dynamicStyles.block, appTheme(themeMode).shadow.light]}>
+          <Text style={dynamicStyles.blockTitle}>🌹 此刻的心情花种</Text>
+          <MoodSelector value={mood} onChange={setMood} />
+        </View>
+
+        <View style={[dynamicStyles.inputCard, appTheme(themeMode).shadow.medium]}>
+          <TextInput
+            multiline
+            value={text}
+            onChangeText={setText}
+            placeholder="在阳光洒下的长椅上，写下你的故事..."
+            placeholderTextColor={colors.textMuted}
+            style={dynamicStyles.input}
+          />
+          <View style={dynamicStyles.row}>
+            <Pressable style={dynamicStyles.ghostBtn}>
+              <Text style={dynamicStyles.ghostBtnText}>📸 留住芬芳</Text>
+            </Pressable>
+            <Pressable style={dynamicStyles.ghostBtn}>
+              <Text style={dynamicStyles.ghostBtnText}>🦋 听蝶起舞</Text>
+            </Pressable>
+          </View>
+          <Pressable style={dynamicStyles.saveBtn} onPress={save}>
+            <Text style={dynamicStyles.saveText}>播种此刻的心情</Text>
+          </Pressable>
+        </View>
+
+        <View style={[dynamicStyles.chartBlock, appTheme(themeMode).shadow.light]}>
+          <Text style={dynamicStyles.sectionTitle}>🦋 心灵成长轨迹</Text>
+          <View style={dynamicStyles.chartWrapper}>
+            <EmotionChart data={chartData.length ? chartData : [{ x: "1", y: 3 }]} />
+          </View>
+        </View>
+
+        <Text style={dynamicStyles.sectionTitle}>🖼 记忆长廊</Text>
+        {entries.length === 0 ? (
+          <View style={dynamicStyles.emptyState}>
+            <Text style={dynamicStyles.emptyText}>花园里还有位置，等候你的心情之花...</Text>
+          </View>
+        ) : (
+          entries.map((e) => (
+            <View key={e.id} style={[dynamicStyles.entryCard, appTheme(themeMode).shadow.light]}>
+              <View style={dynamicStyles.entryHeader}>
+                <Text style={dynamicStyles.entryDate}>{e.date}</Text>
+                <View style={[dynamicStyles.moodTag, { backgroundColor: colors.secondaryGreen + "30" }]}>
+                  <Text style={dynamicStyles.moodTagText}>{e.mood.toUpperCase()}</Text>
+                </View>
+              </View>
+              <Text style={dynamicStyles.entryText}>{e.text}</Text>
+              <Text style={dynamicStyles.flowerDecor}>🌹</Text>
+            </View>
+          ))
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0E1318" },
-  content: { padding: 16, paddingBottom: 100 },
-  topHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
-  brand: { color: "#F3D4C5", fontSize: 24, fontWeight: "900", letterSpacing: 0.5 },
+const styles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.cream },
+  bgCircle: {
+    position: 'absolute',
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    zIndex: 0,
+  },
+  content: { padding: 20, paddingBottom: 100, zIndex: 1 },
+  topHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 },
+  brandContainer: { flexDirection: "row", alignItems: "center" },
+  brandLeaf: { fontSize: 30, marginRight: 8 },
+  brand: { color: colors.primaryGreen, fontSize: 24, fontWeight: "800", letterSpacing: -0.5 },
   headerPill: {
-    color: "#F7DDD0",
-    backgroundColor: "#2A3038",
+    color: colors.primaryGreen,
+    backgroundColor: colors.marbleWhite,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -124,83 +147,80 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
   },
-  heroSection: { marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: "900", color: "#FFF5EE" },
-  subtitle: { marginTop: 6, color: "#AEC2B0", fontSize: 14, lineHeight: 22 },
+  heroSection: { marginBottom: 24 },
+  title: { fontSize: 32, fontWeight: "800", color: colors.text },
+  subtitle: { marginTop: 8, color: colors.textMuted, fontSize: 16, lineHeight: 24 },
   block: {
-    backgroundColor: "#151C23",
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: "#26303A",
-    padding: 16,
-    marginBottom: 16,
-  },
-  blockTitle: { fontSize: 13, color: "#F4DED1", fontWeight: "700", marginBottom: 12, letterSpacing: 1 },
-  inputCard: {
-    backgroundColor: "#141B22",
-    borderRadius: 22,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#26303A",
+    backgroundColor: colors.card,
+    borderRadius: 32,
+    padding: 24,
     marginBottom: 20,
   },
-  input: {
-    color: "#E6F0E6",
-    fontSize: 16,
-    minHeight: 120,
-    textAlignVertical: "top",
-    marginBottom: 16,
-  },
-  row: { flexDirection: "row", gap: 12, marginBottom: 16 },
-  ghostBtn: {
-    flex: 1,
-    backgroundColor: "#232D36",
-    padding: 12,
-    borderRadius: 14,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#3A4654",
-  },
-  ghostBtnText: { color: "#B7C4B7", fontSize: 13, fontWeight: "600" },
-  saveBtn: {
-    backgroundColor: "#F3D4C5",
-    borderRadius: 16,
-    padding: 16,
-    alignItems: "center",
-    shadowColor: "#F3D4C5",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  saveText: { color: "#2F5D46", fontWeight: "800", fontSize: 16 },
-  chartBlock: {
-    backgroundColor: "#151C23",
-    borderRadius: 22,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#26303A",
+  blockTitle: { fontSize: 15, color: colors.text, fontWeight: "800", marginBottom: 16, letterSpacing: 0.5 },
+  inputCard: {
+    backgroundColor: colors.card,
+    borderRadius: 36,
+    padding: 24,
     marginBottom: 24,
   },
-  chartWrapper: { marginTop: 10, alignItems: "center" },
-  sectionTitle: { fontSize: 18, fontWeight: "800", color: "#F4DED1", marginBottom: 12, letterSpacing: 0.5 },
-  entryCard: {
-    backgroundColor: "#1C242C",
-    borderRadius: 20,
+  input: {
+    color: colors.text,
+    fontSize: 17,
+    minHeight: 140,
+    textAlignVertical: "top",
+    marginBottom: 20,
+    lineHeight: 26,
+  },
+  row: { flexDirection: "row", gap: 12, marginBottom: 20 },
+  ghostBtn: {
+    flex: 1,
+    backgroundColor: colors.surface,
     padding: 16,
-    marginBottom: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#F3D4C5",
+    borderRadius: 20,
+    alignItems: "center",
   },
-  entryHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
-  entryDate: { color: "#8A978A", fontSize: 12, fontWeight: "600" },
+  ghostBtnText: { color: colors.primaryGreen, fontSize: 14, fontWeight: "700" },
+  saveBtn: {
+    backgroundColor: colors.primaryGreen,
+    borderRadius: 22,
+    padding: 20,
+    alignItems: "center",
+  },
+  saveText: { color: "#FFFFFF", fontWeight: "800", fontSize: 17 },
+  chartBlock: {
+    backgroundColor: colors.card,
+    borderRadius: 32,
+    padding: 24,
+    marginBottom: 28,
+  },
+  chartWrapper: { marginTop: 12, alignItems: "center" },
+  sectionTitle: { fontSize: 20, fontWeight: "800", color: colors.text, marginBottom: 16 },
+  entryCard: {
+    backgroundColor: colors.card,
+    borderRadius: 28,
+    padding: 24,
+    marginBottom: 16,
+    borderLeftWidth: 8,
+    borderLeftColor: colors.roseRed,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  flowerDecor: {
+    position: 'absolute',
+    right: 12,
+    bottom: 12,
+    fontSize: 20,
+    opacity: 0.25,
+  },
+  entryHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  entryDate: { color: colors.textMuted, fontSize: 13, fontWeight: "600" },
   moodTag: {
-    backgroundColor: "#2A3038",
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 12,
   },
-  moodTagText: { color: "#F3D4C5", fontSize: 10, fontWeight: "800", letterSpacing: 0.5 },
-  entryText: { color: "#E6F0E6", fontSize: 15, lineHeight: 24 },
+  moodTagText: { color: colors.primaryGreen, fontSize: 11, fontWeight: "800" },
+  entryText: { color: colors.text, fontSize: 16, lineHeight: 24 },
   emptyState: { padding: 40, alignItems: "center" },
-  emptyText: { color: "#6F7B70", textAlign: "center", fontSize: 14 },
+  emptyText: { color: colors.textMuted, fontSize: 15, textAlign: "center", fontStyle: "italic" },
 });

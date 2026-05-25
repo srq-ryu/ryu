@@ -1,20 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useSelector } from "react-redux";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, Switch } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../store";
-import { colors } from "../theme";
+import { appTheme } from "../theme";
 import { supabase } from "../services/supabaseClient";
 import { linkService, UserLink } from "../services/linkService";
+import { toggleTheme } from "../store/slices/themeSlice";
 
 export function ProfileScreen() {
+  const dispatch = useDispatch();
   const health = useSelector((s: RootState) => s.health);
+  const themeMode = useSelector((s: RootState) => s.theme.mode);
+  const theme = appTheme(themeMode);
+  const { colors } = theme;
+  const dynamicStyles = styles(colors);
+  
   const [savedLinks, setSavedLinks] = useState<UserLink[]>([]);
   const [loadingLinks, setLoadingLinks] = useState(false);
 
   const userGoals = [
-    { title: "每日步数", value: `${health.steps}`, target: "10,000", icon: "👣", color: "#F3D4C5" },
-    { title: "睡眠时长", value: `${health.sleepHours}h`, target: "8h", icon: "🌙", color: "#AEC2B0" },
-    { title: "静息心率", value: `${health.heartRate}`, target: "60-80", icon: "❤️", color: "#F4DED1" },
+    { title: "庄园步数", value: `${health.steps}`, target: "10,000", icon: "👣", color: colors.secondaryGreen },
+    { title: "深睡时长", value: `${health.sleepHours}h`, target: "8h", icon: "🌙", color: colors.fountainBlue },
+    { title: "静息心率", value: `${health.heartRate}`, target: "60-80", icon: "❤️", color: colors.roseRed },
   ];
 
   useEffect(() => {
@@ -38,139 +45,176 @@ export function ProfileScreen() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.topHeader}>
-        <Text style={styles.brand}>MindGarden</Text>
-        <Pressable style={styles.avatar} onPress={handleLogout}>
-          <Text style={styles.avatarText}>登出</Text>
-        </Pressable>
-      </View>
-
-      <View style={styles.heroSection}>
-        <Text style={styles.title}>我的花园</Text>
-        <Text style={styles.desc}>你的每一次自我照顾，都会让内心重新长出光。</Text>
-      </View>
-
-      <Text style={styles.subtitle}>健康仪表盘</Text>
-      <View style={styles.statsGrid}>
-        {userGoals.map((goal) => (
-          <View key={goal.title} style={styles.statCard}>
-            <Text style={styles.statIcon}>{goal.icon}</Text>
-            <Text style={styles.statValue}>{goal.value}</Text>
-            <Text style={styles.statLabel}>{goal.title}</Text>
-            <View style={[styles.progressBar, { backgroundColor: "#232D36" }]}>
-              <View style={[styles.progressFill, { backgroundColor: goal.color, width: "70%" }]} />
-            </View>
+    <View style={dynamicStyles.container}>
+      {/* 装饰性背景 */}
+      <View style={[dynamicStyles.bgCircle, { top: -100, left: -100, backgroundColor: colors.fountainBlue + "08" }]} />
+      
+      <ScrollView contentContainerStyle={dynamicStyles.content}>
+        <View style={dynamicStyles.topHeader}>
+          <View style={dynamicStyles.brandContainer}>
+            <Text style={dynamicStyles.brandLeaf}>⛲</Text>
+            <Text style={dynamicStyles.brand}>MindGarden</Text>
           </View>
-        ))}
-      </View>
+          <Pressable style={dynamicStyles.avatar} onPress={handleLogout}>
+            <Text style={dynamicStyles.avatarText}>离开庄园</Text>
+          </Pressable>
+        </View>
 
-      <Text style={styles.subtitle}>已收藏的资源</Text>
-      <View style={styles.linksCard}>
-        {savedLinks.length === 0 ? (
-          <Text style={styles.emptyText}>{loadingLinks ? '加载中...' : '还没有收藏任何资源'}</Text>
-        ) : (
-          savedLinks.map((link) => (
-            <View key={link.id} style={styles.linkItem}>
-              <View style={styles.linkInfo}>
-                <Text style={styles.linkTitle}>{link.title}</Text>
-                <Text style={styles.linkType}>{link.type === 'movie' ? '🎬 电影' : '🔗 链接'}</Text>
+        <View style={dynamicStyles.heroSection}>
+          <Text style={dynamicStyles.title}>我的庄园</Text>
+          <Text style={dynamicStyles.desc}>每一次心灵的灌溉，都是为了遇见更好的自己。</Text>
+        </View>
+
+        <Text style={dynamicStyles.subtitle}>庄园状态仪表盘</Text>
+        <View style={dynamicStyles.statsGrid}>
+          {userGoals.map((goal) => (
+            <View key={goal.title} style={[dynamicStyles.statCard, theme.shadow.light]}>
+              <Text style={dynamicStyles.statIcon}>{goal.icon}</Text>
+              <Text style={dynamicStyles.statValue}>{goal.value}</Text>
+              <Text style={dynamicStyles.statLabel}>{goal.title}</Text>
+              <View style={[dynamicStyles.progressBar, { backgroundColor: colors.surface }]}>
+                <View style={[dynamicStyles.progressFill, { backgroundColor: goal.color, width: "70%" }]} />
               </View>
-              <Pressable onPress={async () => {
-                await linkService.deleteLink(link.id!);
-                fetchLinks();
-              }}>
-                <Text style={styles.deleteBtn}>删除</Text>
-              </Pressable>
             </View>
-          ))
-        )}
-      </View>
+          ))}
+        </View>
 
-      <Text style={styles.subtitle}>社区与同步</Text>
-      <View style={styles.settingsCard}>
-        <Pressable style={styles.settingItem}>
-          <Text style={styles.settingText}>🌿 匿名分享社区</Text>
-          <View style={styles.toggleActive} />
-        </Pressable>
-        <View style={styles.divider} />
-        <Pressable style={styles.settingItem}>
-          <Text style={styles.settingText}>☁️ 多设备云端同步</Text>
-          <Text style={styles.settingSub}>已同步</Text>
-        </Pressable>
-      </View>
+        <Text style={dynamicStyles.subtitle}>已珍藏的记忆</Text>
+        <View style={[dynamicStyles.linksCard, theme.shadow.light]}>
+          {savedLinks.length === 0 ? (
+            <Text style={dynamicStyles.emptyText}>{loadingLinks ? '正在翻阅档案...' : '还没有收藏任何珍贵记忆'}</Text>
+          ) : (
+            savedLinks.map((link) => (
+              <View key={link.id} style={dynamicStyles.linkItem}>
+                <View style={dynamicStyles.linkInfo}>
+                  <Text style={dynamicStyles.linkTitle}>{link.title}</Text>
+                  <Text style={dynamicStyles.linkType}>{link.type === 'movie' ? '🎞 光影' : '🔗 笔录'}</Text>
+                </View>
+                <Pressable onPress={async () => {
+                  await linkService.deleteLink(link.id!);
+                  fetchLinks();
+                }}>
+                  <Text style={dynamicStyles.deleteBtn}>归档</Text>
+                </Pressable>
+              </View>
+            ))
+          )}
+        </View>
 
-      <View style={styles.footer}>
-        <Text style={styles.version}>MindGarden v1.0.0</Text>
-      </View>
-    </ScrollView>
+        <Text style={dynamicStyles.subtitle}>庄园管家</Text>
+        <View style={[dynamicStyles.settingsCard, theme.shadow.light]}>
+          <View style={dynamicStyles.settingItem}>
+            <View>
+              <Text style={dynamicStyles.settingText}>🌙 深夜模式 (星光庄园)</Text>
+              <Text style={dynamicStyles.settingSubDesc}>开启星光点点的静谧夜色</Text>
+            </View>
+            <Switch
+              value={themeMode === "dark"}
+              onValueChange={() => dispatch(toggleTheme())}
+              trackColor={{ false: colors.border, true: colors.primaryGreen }}
+              thumbColor={colors.card}
+            />
+          </View>
+          <View style={dynamicStyles.divider} />
+          <Pressable style={dynamicStyles.settingItem}>
+            <Text style={dynamicStyles.settingText}>🌿 庄园主匿名社区</Text>
+            <View style={dynamicStyles.toggleActive} />
+          </Pressable>
+          <View style={dynamicStyles.divider} />
+          <Pressable style={dynamicStyles.settingItem}>
+            <Text style={dynamicStyles.settingText}>☁️ 记忆云端同步</Text>
+            <Text style={dynamicStyles.settingSub}>已备份</Text>
+          </Pressable>
+        </View>
+
+        <View style={dynamicStyles.footer}>
+          <Text style={dynamicStyles.version}>MindGarden Classic v1.2.0</Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0E1318" },
-  content: { padding: 16, paddingBottom: 100 },
-  topHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 },
-  brand: { color: "#F3D4C5", fontSize: 24, fontWeight: "900", letterSpacing: 0.5 },
-  avatar: {
-    paddingHorizontal: 12,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#2A3038",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#3A4654",
+const styles = (colors: any) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.cream },
+  bgCircle: {
+    position: 'absolute',
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    zIndex: 0,
   },
-  avatarText: { color: "#F3D4C5", fontWeight: "700", fontSize: 13 },
-  heroSection: { marginBottom: 28 },
-  title: { fontSize: 32, fontWeight: "900", color: "#FFF5EE" },
-  desc: { marginTop: 8, color: "#AEC2B0", fontSize: 14, lineHeight: 22 },
-  subtitle: { marginTop: 12, marginBottom: 16, fontWeight: "800", color: "#F4DED1", fontSize: 18, letterSpacing: 0.5 },
+  content: { padding: 20, paddingBottom: 100, zIndex: 1 },
+  topHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 },
+  brandContainer: { flexDirection: "row", alignItems: "center" },
+  brandLeaf: { fontSize: 30, marginRight: 8 },
+  brand: { color: colors.primaryGreen, fontSize: 24, fontWeight: "800", letterSpacing: -0.5 },
+  avatar: {
+    backgroundColor: colors.marbleWhite,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 14,
+  },
+  avatarText: { color: colors.primaryGreen, fontWeight: "800", fontSize: 13 },
+  heroSection: { marginBottom: 24 },
+  title: { fontSize: 32, fontWeight: "800", color: colors.text },
+  desc: { marginTop: 8, color: colors.textMuted, fontSize: 16, lineHeight: 24 },
+  subtitle: { fontSize: 18, fontWeight: "800", color: colors.text, marginBottom: 16, marginTop: 12 },
   statsGrid: { flexDirection: "row", gap: 12, marginBottom: 24 },
   statCard: {
     flex: 1,
-    backgroundColor: "#151C23",
-    borderRadius: 22,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#26303A",
+    backgroundColor: colors.card,
+    borderRadius: 28,
+    padding: 18,
     alignItems: "center",
   },
-  statIcon: { fontSize: 24, marginBottom: 8 },
-  statValue: { color: "#FFF5EE", fontSize: 20, fontWeight: "800" },
-  statLabel: { color: "#8A978A", fontSize: 11, marginTop: 4, fontWeight: "600" },
-  progressBar: { height: 4, width: "100%", borderRadius: 2, marginTop: 12, overflow: "hidden" },
-  progressFill: { height: "100%", borderRadius: 2 },
-  linksCard: { backgroundColor: "#141B22", borderRadius: 22, padding: 16, borderWidth: 1, borderColor: "#26303A", marginBottom: 28 },
-  linkItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#26303A' },
+  statIcon: { fontSize: 26, marginBottom: 10 },
+  statValue: { fontSize: 22, fontWeight: "800", color: colors.text },
+  statLabel: { fontSize: 12, color: colors.textMuted, marginTop: 6, marginBottom: 14, fontWeight: "600" },
+  progressBar: { height: 6, width: "100%", borderRadius: 3, overflow: "hidden" },
+  progressFill: { height: "100%", borderRadius: 3 },
+  linksCard: {
+    backgroundColor: colors.card,
+    borderRadius: 32,
+    padding: 24,
+    marginBottom: 24,
+  },
+  linkItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.surface,
+  },
   linkInfo: { flex: 1 },
-  linkTitle: { color: '#FFF5EE', fontSize: 15, fontWeight: '700', marginBottom: 4 },
-  linkType: { color: '#8A978A', fontSize: 12 },
-  deleteBtn: { color: '#FF6B6B', fontSize: 13, fontWeight: '600' },
-  emptyText: { color: '#8A978A', textAlign: 'center', paddingVertical: 20 },
+  linkTitle: { fontSize: 16, fontWeight: "700", color: colors.text },
+  linkType: { fontSize: 13, color: colors.textMuted, marginTop: 6 },
+  deleteBtn: { color: colors.roseRed, fontSize: 14, fontWeight: "700" },
+  emptyText: { color: colors.textMuted, textAlign: "center", paddingVertical: 24, fontStyle: 'italic' },
   settingsCard: {
-    backgroundColor: "#141B22",
-    borderRadius: 22,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: "#26303A",
+    backgroundColor: colors.card,
+    borderRadius: 32,
+    padding: 24,
   },
   settingItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
+    paddingVertical: 16,
   },
-  settingText: { color: "#E6F0E6", fontSize: 15, fontWeight: "600" },
-  settingSub: { color: "#8A978A", fontSize: 13 },
+  settingText: { fontSize: 16, fontWeight: "700", color: colors.text },
+  settingSub: { fontSize: 14, color: colors.primaryGreen, fontWeight: "800" },
+  settingSubDesc: { fontSize: 12, color: colors.textMuted, marginTop: 4 },
   toggleActive: {
     width: 24,
-    height: 12,
-    backgroundColor: "#F3D4C5",
-    borderRadius: 6,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.primaryGreen,
+    borderWidth: 5,
+    borderColor: colors.secondaryGreen,
   },
-  footer: { marginTop: 32, alignItems: "center" },
-  version: { color: "#26303A", fontSize: 12, fontWeight: "700" },
-  divider: { height: 1, backgroundColor: "#26303A", marginVertical: 16 },
+  divider: { height: 1, backgroundColor: colors.surface },
+  footer: { marginTop: 40, alignItems: "center" },
+  version: { color: colors.border, fontSize: 12, fontWeight: "800" },
 });

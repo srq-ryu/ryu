@@ -2,6 +2,9 @@ import { Audio } from "expo-av";
 import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Song } from "../services/recommendationService";
+import { appTheme } from "../theme";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 
 type Props = {
   songs?: Song[];
@@ -12,6 +15,10 @@ export function MusicPlayer({ songs }: Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const soundRef = useRef<Audio.Sound | null>(null);
   const currentSong = songs?.[currentIndex];
+  
+  const themeMode = useSelector((s: RootState) => s.theme.mode);
+  const theme = appTheme(themeMode);
+  const { colors } = theme;
 
   useEffect(() => {
     setCurrentIndex(0);
@@ -48,25 +55,25 @@ export function MusicPlayer({ songs }: Props) {
   };
 
   return (
-    <View style={styles.card}>
-      <Text style={styles.kicker}>HEALING SOUNDSCAPE</Text>
-      <Text style={styles.title}>治愈播放器</Text>
-      <Text style={styles.name}>
-        {currentSong ? `${currentSong.title} - ${currentSong.artist}` : "请选择心情后播放"}
+    <View style={[styles.card, { backgroundColor: colors.card }, theme.shadow.light]}>
+      <Text style={[styles.kicker, { color: colors.accent }]}>🌷 HARMONY OF FLOWERS</Text>
+      <Text style={[styles.title, { color: colors.text }]}>心灵播放器</Text>
+      <Text style={[styles.name, { color: colors.textMuted }]}>
+        {currentSong ? `${currentSong.title} - ${currentSong.artist}` : "在花园中静待旋律..."}
       </Text>
       <View style={styles.controls}>
-        <Pressable style={styles.secondaryButton} onPress={() => changeTrack(currentIndex - 1)}>
-          <Text style={styles.secondaryText}>上一首</Text>
+        <Pressable style={[styles.secondaryButton, { backgroundColor: colors.surface }]} onPress={() => changeTrack(currentIndex - 1)}>
+          <Text style={[styles.secondaryText, { color: colors.primaryGreen }]}>上一首</Text>
         </Pressable>
-        <Pressable style={styles.button} onPress={toggle}>
-          <Text style={styles.buttonText}>{playing ? "暂停" : "播放"}</Text>
+        <Pressable style={[styles.button, { backgroundColor: colors.primaryGreen }]} onPress={toggle}>
+          <Text style={styles.buttonText}>{playing ? "⏸ 休息片刻" : "▶ 开始疗愈"}</Text>
         </Pressable>
-        <Pressable style={styles.secondaryButton} onPress={() => changeTrack(currentIndex + 1)}>
-          <Text style={styles.secondaryText}>下一首</Text>
+        <Pressable style={[styles.secondaryButton, { backgroundColor: colors.surface }]} onPress={() => changeTrack(currentIndex + 1)}>
+          <Text style={[styles.secondaryText, { color: colors.primaryGreen }]}>下一首</Text>
         </Pressable>
       </View>
-      <Text style={styles.meta}>
-        {songs?.length ? `歌单共 ${songs.length} 首 · 放松呼吸跟随节拍` : "等待推荐歌单"}
+      <Text style={[styles.meta, { color: colors.textMuted }]}>
+        {songs?.length ? `莫奈的花园里还有 ${songs.length} 首旋律` : "等待花开，等待音乐"}
       </Text>
     </View>
   );
@@ -74,34 +81,27 @@ export function MusicPlayer({ songs }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#1B232B",
-    borderRadius: 22,
-    padding: 18,
-    marginTop: 8,
-    borderWidth: 1,
-    borderColor: "#2D3945",
+    borderRadius: 24,
+    padding: 20,
+    marginTop: 12,
   },
-  kicker: { color: "#CFB2A1", fontSize: 10, fontWeight: "700", letterSpacing: 1.4 },
-  title: { fontWeight: "800", color: "#E8F2E8", fontSize: 17, letterSpacing: 0.3 },
-  name: { marginTop: 8, color: "#A9BCAB", lineHeight: 21, fontSize: 14 },
-  controls: { marginTop: 14, flexDirection: "row", gap: 8, alignItems: "center" },
+  kicker: { fontSize: 10, fontWeight: "800", letterSpacing: 1.5, marginBottom: 4 },
+  title: { fontWeight: "800", fontSize: 18 },
+  name: { marginTop: 10, lineHeight: 22, fontSize: 15, fontWeight: "600" },
+  controls: { marginTop: 20, flexDirection: "row", gap: 12, alignItems: "center" },
   button: {
-    backgroundColor: "#2E6A55",
-    flex: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
+    flex: 2,
+    borderRadius: 16,
+    paddingVertical: 14,
     alignItems: "center",
   },
-  buttonText: { color: "#E8FFF2", fontWeight: "700" },
+  buttonText: { color: "#FFFFFF", fontWeight: "800", fontSize: 15 },
   secondaryButton: {
-    backgroundColor: "#26303A",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    borderWidth: 1,
-    borderColor: "#364351",
+    flex: 1,
+    borderRadius: 16,
+    paddingVertical: 14,
+    alignItems: "center",
   },
-  secondaryText: { color: "#C6D4C8", fontWeight: "600" },
-  meta: { marginTop: 12, fontSize: 12, color: "#95A998", letterSpacing: 0.2 },
+  secondaryText: { fontWeight: "700", fontSize: 13 },
+  meta: { marginTop: 16, fontSize: 12, textAlign: "center", fontStyle: "italic" },
 });

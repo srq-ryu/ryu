@@ -10,6 +10,9 @@ import {
   ScrollView,
 } from 'react-native';
 import { supabase } from '../services/supabaseClient';
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
+import { appTheme } from "../theme";
 
 export function AuthScreen() {
   const [email, setEmail] = useState('');
@@ -17,6 +20,10 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [message, setMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
+  
+  const themeMode = useSelector((s: RootState) => s.theme.mode);
+  const { colors } = appTheme(themeMode);
+  const dynamicStyles = styles(colors);
 
   async function handleAuth() {
     if (!email || !password) {
@@ -60,35 +67,35 @@ export function AuthScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
+      style={dynamicStyles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.card}>
-          <Text style={styles.title}>{isSignUp ? '加入心园' : '欢迎回来'}</Text>
-          <Text style={styles.subtitle}>
+      <ScrollView contentContainerStyle={dynamicStyles.scrollContent}>
+        <View style={dynamicStyles.card}>
+          <Text style={dynamicStyles.title}>{isSignUp ? '加入心园' : '欢迎回来'}</Text>
+          <Text style={dynamicStyles.subtitle}>
             {isSignUp ? '开启你的心灵疗愈之旅' : '继续探索你的内心世界'}
           </Text>
 
           {message && (
-            <View style={[styles.messageBox, message.type === 'error' ? styles.errorBox : styles.successBox]}>
-              <Text style={styles.messageText}>{message.text}</Text>
+            <View style={[dynamicStyles.messageBox, message.type === 'error' ? dynamicStyles.errorBox : dynamicStyles.successBox]}>
+              <Text style={dynamicStyles.messageText}>{message.text}</Text>
             </View>
           )}
 
-          <View style={styles.inputContainer}>
+          <View style={dynamicStyles.inputContainer}>
             <TextInput
-              style={styles.input}
+              style={dynamicStyles.input}
               placeholder="邮箱"
-              placeholderTextColor="#8A978A"
+              placeholderTextColor={colors.textMuted}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
             />
             <TextInput
-              style={styles.input}
+              style={dynamicStyles.input}
               placeholder="密码"
-              placeholderTextColor="#8A978A"
+              placeholderTextColor={colors.textMuted}
               value={password}
               onChangeText={setPassword}
               secureTextEntry
@@ -96,11 +103,11 @@ export function AuthScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
+            style={[dynamicStyles.button, loading && dynamicStyles.buttonDisabled]}
             onPress={handleAuth}
             disabled={loading}
           >
-            <Text style={styles.buttonText}>
+            <Text style={dynamicStyles.buttonText}>
               {loading ? '处理中...' : isSignUp ? '立即注册' : '登录'}
             </Text>
           </TouchableOpacity>
@@ -110,20 +117,20 @@ export function AuthScreen() {
               setIsSignUp(!isSignUp);
               setMessage(null);
             }}
-            style={styles.switchContainer}
+            style={dynamicStyles.switchContainer}
           >
-            <Text style={styles.switchText}>
+            <Text style={dynamicStyles.switchText}>
               {isSignUp ? '已有账号？登录' : '没有账号？立即注册'}
             </Text>
           </TouchableOpacity>
 
           {isSignUp && (
-            <View style={styles.tipContainer}>
-              <Text style={styles.tipTitle}>💡 开发小贴士</Text>
-              <Text style={styles.tipText}>
+            <View style={dynamicStyles.tipContainer}>
+              <Text style={dynamicStyles.tipTitle}>💡 开发小贴士</Text>
+              <Text style={dynamicStyles.tipText}>
                 如果注册后无法直接进入应用，通常是因为 Supabase 开启了邮箱验证。
               </Text>
-              <Text style={styles.tipText}>
+              <Text style={dynamicStyles.tipText}>
                 你可以：
                 1. 检查收件箱确认邮件
                 2. 或在 Supabase 控制台的 Authentication {'>'} Settings 中关闭 "Confirm email" 选项。
@@ -136,10 +143,10 @@ export function AuthScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0E1318',
+    backgroundColor: colors.cream,
   },
   scrollContent: {
     flexGrow: 1,
@@ -147,26 +154,26 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   card: {
-    backgroundColor: '#1A222C',
+    backgroundColor: colors.card,
     borderRadius: 24,
     padding: 30,
     borderWidth: 1,
-    borderColor: '#2A323C',
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
+    borderColor: colors.border,
+    shadowColor: colors.primaryGreen,
+    shadowOpacity: 0.1,
     shadowRadius: 20,
     elevation: 10,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.text,
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#8A978A',
+    color: colors.textMuted,
     marginBottom: 24,
     textAlign: 'center',
   },
@@ -183,11 +190,11 @@ const styles = StyleSheet.create({
   successBox: {
     backgroundColor: 'rgba(47, 93, 70, 0.15)',
     borderWidth: 1,
-    borderColor: '#2F5D46',
+    borderColor: colors.primaryGreen,
   },
   messageText: {
     fontSize: 14,
-    color: '#FFFFFF',
+    color: colors.text,
     textAlign: 'center',
     lineHeight: 20,
   },
@@ -196,16 +203,16 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   input: {
-    backgroundColor: '#2A323C',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
-    color: '#FFFFFF',
+    color: colors.text,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#3A4654',
+    borderColor: colors.border,
   },
   button: {
-    backgroundColor: '#2F5D46',
+    backgroundColor: colors.primaryGreen,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -224,25 +231,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   switchText: {
-    color: '#AEC2B0',
+    color: colors.primaryGreen,
     fontSize: 14,
+    fontWeight: '600',
   },
   tipContainer: {
     marginTop: 30,
     padding: 16,
-    backgroundColor: '#0E1318',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#2A323C',
+    borderColor: colors.border,
   },
   tipTitle: {
-    color: '#F3D4C5',
+    color: colors.text,
     fontSize: 14,
     fontWeight: '700',
     marginBottom: 8,
   },
   tipText: {
-    color: '#8A978A',
+    color: colors.textMuted,
     fontSize: 12,
     lineHeight: 18,
     marginBottom: 4,

@@ -8,50 +8,58 @@ import { ProfileScreen } from "../screens/ProfileScreen";
 import { AuthScreen } from "../screens/AuthScreen";
 import { supabase } from "../services/supabaseClient";
 import { Session } from "@supabase/supabase-js";
+import { appTheme } from "../theme";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
+  const themeMode = useSelector((s: RootState) => s.theme.mode);
+  const theme = appTheme(themeMode);
+  const { colors } = theme;
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#2F5D46",
-        tabBarInactiveTintColor: "#8A978A",
+        tabBarActiveTintColor: colors.primaryGreen,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {
           position: "absolute",
-          left: 14,
-          right: 14,
-          bottom: 12,
-          height: 64,
-          borderRadius: 20,
-          backgroundColor: "#FFFDF8",
+          left: 20,
+          right: 20,
+          bottom: 24,
+          height: 72,
+          borderRadius: 24,
+          backgroundColor: colors.card,
           borderTopWidth: 0,
-          elevation: 6,
-          shadowColor: "#B7C9B5",
-          shadowOpacity: 0.18,
-          shadowRadius: 14,
-          shadowOffset: { width: 0, height: 8 },
+          elevation: 10,
+          shadowColor: colors.primaryGreen,
+          shadowOpacity: 0.1,
+          shadowRadius: 20,
+          shadowOffset: { width: 0, height: 10 },
+          paddingBottom: 10,
         },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: "700", paddingBottom: 6 },
-        tabBarIconStyle: { marginTop: 6 },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: "700", marginBottom: 6 },
+        tabBarIconStyle: { marginTop: 8 },
       }}
     >
       <Tab.Screen
         name="发现"
         component={DiscoverScreen}
-        options={{ tabBarIcon: ({ color }) => <Text style={{ color }}>🎨</Text>, tabBarLabel: "发现" }}
+        options={{ tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🎨</Text>, tabBarLabel: "发现" }}
       />
       <Tab.Screen
         name="记录"
         component={JournalScreen}
-        options={{ tabBarIcon: ({ color }) => <Text style={{ color }}>📝</Text>, tabBarLabel: "记录" }}
+        options={{ tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>📝</Text>, tabBarLabel: "记录" }}
       />
       <Tab.Screen
         name="我的"
         component={ProfileScreen}
-        options={{ tabBarIcon: ({ color }) => <Text style={{ color }}>🌿</Text>, tabBarLabel: "我的" }}
+        options={{ tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>⛲</Text>, tabBarLabel: "我的" }}
       />
     </Tab.Navigator>
   );
@@ -60,6 +68,9 @@ function MainTabs() {
 export function RootNavigator() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const themeMode = useSelector((s: RootState) => s.theme.mode);
+  const theme = appTheme(themeMode);
+  const { colors } = theme;
 
   useEffect(() => {
     // Check current session
@@ -78,8 +89,8 @@ export function RootNavigator() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#0E1318" }}>
-        <ActivityIndicator size="large" color="#2F5D46" />
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.cream }}>
+        <ActivityIndicator size="large" color={colors.primaryGreen} />
       </View>
     );
   }
